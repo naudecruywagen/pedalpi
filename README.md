@@ -22,3 +22,7 @@ If you get the message 'Host raspberrypi.local not found in /Users/[user]/.ssh/k
 `gcc -o example -l rt example.c -l bcm2835`
 
 `./example`
+
+### Shutdown before unplugging
+
+`sudo shutdown -h now`
