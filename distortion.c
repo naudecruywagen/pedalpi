@@ -24,13 +24,15 @@ uint8_t PUSH2_val;
 int main(int argc, char **argv)
 {
     // Start the BCM2835 Library to access GPIO.
-    if (!bcm2835_init())
-    { printf("bcm2835_init failed. Are you running as root??\n");
-      return 1;}
+    if (!bcm2835_init()) { 
+        printf("bcm2835_init failed. Are you running as root??\n");
+        return 1;
+    }
 	// Start the SPI BUS.
-	if (!bcm2835_spi_begin())
-    {printf("bcm2835_spi_begin failed. Are you running as root??\n");
-      return 1;}
+	if (!bcm2835_spi_begin()) {
+        printf("bcm2835_spi_begin failed. Are you running as root??\n");
+        return 1;
+    }
 	
 	//define PWM	
     bcm2835_gpio_fsel(18,BCM2835_GPIO_FSEL_ALT5 ); //PWM0 signal on GPIO18    
