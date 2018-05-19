@@ -65,44 +65,45 @@ int main(int argc, char **argv)
 	bcm2835_gpio_set_pud(TOGGLE_SWITCH, BCM2835_GPIO_PUD_UP);   //TOGGLE_SWITCH pull-up enabled 
 	bcm2835_gpio_set_pud(FOOT_SWITCH, BCM2835_GPIO_PUD_UP);     //FOOT_SWITCH pull-up enabled 
 	
-	while(1) //Main Loop
-	{
-	//read 12 bits ADC
-    bcm2835_spi_transfernb(mosi, miso, 3);
-    input_signal = miso[2] + ((miso[1] & 0x0F) << 8); 
+	while(1) { //Main Loop
 
-	//Read the PUSH buttons every 50000 times (0.25s) to save resources.
-	read_timer++;
-	if (read_timer==50000)
-	{
-	read_timer=0;
-	uint8_t PUSH1_val = bcm2835_gpio_lev(PUSH1);
-	uint8_t PUSH2_val = bcm2835_gpio_lev(PUSH2);
-    TOGGLE_SWITCH_val = bcm2835_gpio_lev(TOGGLE_SWITCH);
-	uint8_t FOOT_SWITCH_val = bcm2835_gpio_lev(FOOT_SWITCH);
-	//light the effect when the footswitch is activated.
-	bcm2835_gpio_write(LED,!FOOT_SWITCH_val); 
-	
-	//update booster_value when the PUSH1 or 2 buttons are pushed.
-	if (PUSH1_val==0) //less distortion
-		{ bcm2835_delay(100); //100ms delay for buttons debouncing
-         if (distortion_value<2047) distortion_value=distortion_value+10;
-		}
-		else if (PUSH2_val==0) //more distortion
-			{bcm2835_delay(100); //100ms delay for buttons debouncing.
-			if (distortion_value>0) distortion_value=distortion_value-10;
-			}
-	}
+        //read 12 bits ADC
+        bcm2835_spi_transfernb(mosi, miso, 3);
+        input_signal = miso[2] + ((miso[1] & 0x0F) << 8); 
 
-	//**** FUZZ EFFECT ***///
-	//The input_signal is clipped to the maximum value when it reaches the distortion_value threshold.
-	//The guitar signal fluctuates above and under 2047.
-    if (input_signal > 2047 + distortion_value) input_signal= 2047 + distortion_value;
-	if (input_signal < 2047 - distortion_value) input_signal= 2047 - distortion_value;
-	
-	//generate output PWM signal 6 bits
-    bcm2835_pwm_set_data(1,input_signal & 0x3F);
-    bcm2835_pwm_set_data(0,input_signal >> 6);
+        //Read the PUSH buttons every 50000 times (0.25s) to save resources.
+        read_timer++;
+        if (read_timer == 50000) {
+            read_timer = 0;
+            uint8_t PUSH1_val = bcm2835_gpio_lev(PUSH1);
+            uint8_t PUSH2_val = bcm2835_gpio_lev(PUSH2);
+            TOGGLE_SWITCH_val = bcm2835_gpio_lev(TOGGLE_SWITCH);
+            uint8_t FOOT_SWITCH_val = bcm2835_gpio_lev(FOOT_SWITCH);
+            //light the effect when the footswitch is activated.
+            bcm2835_gpio_write(LED,!FOOT_SWITCH_val); 
+            
+            //update booster_value when the PUSH1 or 2 buttons are pushed.
+            if (PUSH1_val == 0) //less distortion
+                { bcm2835_delay(100); //100ms delay for buttons debouncing
+                 if (distortion_value<2047) distortion_value=distortion_value+10;
+                }
+                else if (PUSH2_val == 0) //more distortion
+                    {bcm2835_delay(100); //100ms delay for buttons debouncing.
+                    if (distortion_value>0) distortion_value=distortion_value-10;
+                    }
+        }
+        //printf("Distortion value: %zu\n", distortion_value);
+        printf("Push 1 value: %zu\n", PUSH1_val);
+
+        //**** FUZZ EFFECT ***///
+        //The input_signal is clipped to the maximum value when it reaches the distortion_value threshold.
+        //The guitar signal fluctuates above and under 2047.
+        if (input_signal > 2047 + distortion_value) input_signal= 2047 + distortion_value;
+        if (input_signal < 2047 - distortion_value) input_signal= 2047 - distortion_value;
+        
+        //generate output PWM signal 6 bits
+        bcm2835_pwm_set_data(1,input_signal & 0x3F);
+        bcm2835_pwm_set_data(0,input_signal >> 6);
     }
 	
 	//close all and exit
