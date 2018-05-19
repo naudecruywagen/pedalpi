@@ -83,14 +83,13 @@ int main(int argc, char **argv)
             bcm2835_gpio_write(LED,!FOOT_SWITCH_val); 
             
             //update booster_value when the PUSH1 or 2 buttons are pushed.
-            if (PUSH1_val == 0) //less distortion
-                { bcm2835_delay(100); //100ms delay for buttons debouncing
-                 if (distortion_value<2047) distortion_value=distortion_value+10;
-                }
-                else if (PUSH2_val == 0) //more distortion
-                    {bcm2835_delay(100); //100ms delay for buttons debouncing.
-                    if (distortion_value>0) distortion_value=distortion_value-10;
-                    }
+            if (PUSH1_val == 0) { //less distortion
+                bcm2835_delay(100); //100ms delay for buttons debouncing
+                if (distortion_value < 2047) distortion_value = distortion_value + 10;
+            } else if (PUSH2_val == 0) { //more distortion
+                bcm2835_delay(100); //100ms delay for buttons debouncing.
+                if (distortion_value > 0) distortion_value = distortion_value - 10;
+            }
         }
         //printf("Distortion value: %zu\n", distortion_value);
         printf("Push 1 value: %zu\n", PUSH1_val);
@@ -98,8 +97,8 @@ int main(int argc, char **argv)
         //**** FUZZ EFFECT ***///
         //The input_signal is clipped to the maximum value when it reaches the distortion_value threshold.
         //The guitar signal fluctuates above and under 2047.
-        if (input_signal > 2047 + distortion_value) input_signal= 2047 + distortion_value;
-        if (input_signal < 2047 - distortion_value) input_signal= 2047 - distortion_value;
+        if (input_signal > 2047 + distortion_value) input_signal = 2047 + distortion_value;
+        if (input_signal < 2047 - distortion_value) input_signal = 2047 - distortion_value;
         
         //generate output PWM signal 6 bits
         bcm2835_pwm_set_data(1,input_signal & 0x3F);
